@@ -3,8 +3,8 @@
 
 #define MAX_LOOP 10
 
-char ssid[] = "helix922.4";
-char password[] = "singerose";
+char ssid[] = "";
+char password[] = "";
 
 
 AliotObj lumiere = AliotObj("cbd779aa-42d8-4cea-9961-f11abc9cd0f9");
