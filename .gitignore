@@ -1,0 +1,10 @@
+.pio
+.vscode/
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.vscode/ipch
+*.exe
+build/
+cmake-build-nodemcu-32s/
+CMakeLists.txt
+CMakeListsPrivate.txt
