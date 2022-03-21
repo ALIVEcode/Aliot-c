@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include "Aliotlib.hpp"
 
-char ssid[] = "Helix922.4";
-char password[] = "singerose";
+char ssid[] = "";
+char password[] = "";
 
 
 AliotObj lumiere = AliotObj("cbd779aa-42d8-4cea-9961-f11abc9cd0f9");
