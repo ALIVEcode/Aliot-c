@@ -52,7 +52,7 @@ private:
     std::vector<Listener> broadcastListeners = {};
 
 public:
-    explicit AliotProject(Id project_id);
+    explicit AliotProject(Id _projectId);
 
     Id getId() const;
 
@@ -66,7 +66,7 @@ public:
     void broadcast(JsonObject data);
 
     template<typename T>
-    void updateComponent(Id component_id, T value);
+    void updateComponent(Id componentId, T value);
 
     //----------------- document related -----------------//
 
@@ -83,41 +83,43 @@ private:
     Id objectId{};
     mapProtocols protocols = {};
     bool running = false;
-    std::map<const char *, AliotProject*> aliot_projects{};
+    std::vector<AliotProject> aliotProjects{};
+
+    WiFiClient wifi;
     WebSocketClient *client = nullptr;
 
     void handleOnMessage(const DynamicJsonDocument &json);
 
-    void sendEvent(const char *eventName, JsonObject data);
+    void sendEvent(const char *eventName, const DynamicJsonDocument &data);
 
 public:
 
-    explicit AliotObj(Id object_id);
+    explicit AliotObj(Id _objectId);
 
     // Decorators
     template<typename T>
-    void on_action(long action_id, std::function<void(T value)> f);
+    void onAction(long actionId, std::function<void(T value)> f);
 
-    void add_project(AliotProject project);
+    void addProject(const AliotProject &project);
 
     // Websocket
     // TODO add URL in begin
-    void begin(const char *server_address = "wss://alivecode.ca", const char *path = "/iotgateway/", int port = 8881);
+    void begin(const char *serverAddress = "wss://alivecode.ca/iotgateway", const char *path = "/", int port = 8881);
 
     bool update();
     // void webSocketEvent(WStype_t type, uint8_t *payload, size_t length);
 
-    void updateProjectDoc(const AliotProject &project, Fields fieldsToUpdate);
+    void updateProjectDoc(const AliotProject &project, const DynamicJsonDocument &fieldsToUpdate);
 
-    JsonObject getProjectDoc(const AliotProject &project);
+    StaticJsonDocument<1024> getProjectDoc(const AliotProject &project);
 
-    JsonObject getProjectDocField(const AliotProject &project, Id field);
+    StaticJsonDocument<512> getProjectDocField(const AliotProject &project, Id field);
 
 };
 
 namespace aliot
 {
-    void connectToWiFi(char *ssid, const char *password, bool log_connection = true);
+    void connectToWiFi(char *ssid, const char *password);
 }
 
 #endif // ALIOTC_LIB_ALIOTLIB_H_

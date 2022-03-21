@@ -1,17 +1,11 @@
 #include "Aliotlib.hpp"
 #include <WiFi.h>
 
-#include <utility>
-
-#define ALIOT_OBJ_ALREADY_SET std::runtime_error("An AliotObj instance already exists and there can only be one AliotObj per program.")
-#define NO_ALIOT_OBJ_INSTANCE std::runtime_error("You must create an AliotObj instance before trying to get it.")
-
 //----------------- AliotProject -----------------//
 
-
-AliotProject::AliotProject(Id project_id)
+AliotProject::AliotProject(Id _projectId)
 {
-    this->projectId = project_id;
+    this->projectId = _projectId;
 }
 
 void AliotProject::onDocChange(const FieldNames &fieldNames, const ListenerCallback &callback)
@@ -27,7 +21,7 @@ void AliotProject::onRecvBroadcast(const ListenerCallback &callback)
 }
 
 template<typename T>
-void AliotProject::updateComponent(Id component_id, T value)
+void AliotProject::updateComponent(Id componentId, T value)
 {
 }
 
@@ -54,48 +48,33 @@ void AliotProject::_handleListen(Fields fields)
 
 
 
-AliotObj::AliotObj(Id object_id)
+AliotObj::AliotObj(Id _objectId)
 {
-    this->objectId = object_id;
+    this->objectId = _objectId;
 }
 
 template<typename T>
-void AliotObj::on_action(long action_id, std::function<void(T)> f)
+void AliotObj::onAction(long actionId, std::function<void(T)> f)
 {
 }
 
 
-void AliotObj::add_project(AliotProject project)
+void AliotObj::addProject(const AliotProject &project)
 {
-
-    this->aliot_projects[project.getId()] = &project;
-}
-
-void aliot::connectToWiFi(char *ssid, const char *password, bool log_connection)
-{
-    WiFi.begin(ssid, password);
-    if (log_connection) Serial.print("Connecting to WiFi ..");
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        if (log_connection) Serial.print('.');
-        delay(1000);
-    }
+    this->aliotProjects.push_back(project);
 }
 
 
-void AliotObj::begin(const char *server_address, const char *path, int port)
+void AliotObj::begin(const char *serverAddress, const char *path, int port)
 {
-    WiFiClient wifi;
-    if (!this->client)
-        this->client = new WebSocketClient(wifi, server_address, port);
-
-    if (!this->client->connected())
-        client->begin(path);
+    this->client = new WebSocketClient(wifi, serverAddress);
+    client->begin();
 }
 
 bool AliotObj::update()
 {
-    if (client->connected() && client->parseMessage() > 0)
+    bool connected = client->connected();
+    if (connected && client->parseMessage())
     {
         DynamicJsonDocument response(1024);
         auto err = deserializeJson(response, client->readString());
@@ -105,21 +84,40 @@ bool AliotObj::update()
         }
         handleOnMessage(response);
     }
-    return client->connected();
+    return connected;
 }
 
 void AliotObj::handleOnMessage(const DynamicJsonDocument &json)
 {
     auto event = std::string(json["event"].as<const char *>());
     auto data = json["data"];
-    auto project = *this->aliot_projects[data["projectId"]];
+    Id projectId = data["projectId"];
+
+    AliotProject *project;
+    for (auto _project: aliotProjects)
+    {
+        if (std::string(_project.getId()) == projectId)
+        {
+            project = &_project;
+            break;
+        }
+    }
+    if (!project)
+    {
+        Serial.print("Error, project with id: '");
+        Serial.print(projectId);
+        Serial.print("' was not added to aliot object with id: '");
+        Serial.print(objectId);
+        Serial.println("'.");
+        return;
+    }
 
     if (event == "action")
     {
 
     } else if (event == "listen")
     {
-        project._handleListen(data["fields"]);
+        project->_handleListen(data["fields"]);
     } else if (event == "broadcast")
     {
 
@@ -136,21 +134,47 @@ void AliotObj::handleOnMessage(const DynamicJsonDocument &json)
 }
 
 
-void AliotObj::sendEvent(const char *eventName, JsonObject data)
+void AliotObj::sendEvent(const char *eventName, const DynamicJsonDocument &data)
 {
+    DynamicJsonDocument response(1024);
+    response["event"] = eventName;
+    response["data"] = data;
+    serializeJson(response, wifi);
 }
 
-void AliotObj::updateProjectDoc(const AliotProject &project, Fields fieldsToUpdate)
+void AliotObj::updateProjectDoc(const AliotProject &project, const DynamicJsonDocument &fieldsToUpdate)
 {
+    sendEvent(project.getId(), fieldsToUpdate);
 }
 
-JsonObject AliotObj::getProjectDoc(const AliotProject &project)
+StaticJsonDocument<1024> AliotObj::getProjectDoc(const AliotProject &project)
 {
     return {};
 }
 
-JsonObject AliotObj::getProjectDocField(const AliotProject &project, Id field)
+StaticJsonDocument<512> AliotObj::getProjectDocField(const AliotProject &project, Id field)
 {
     return {};
 }
+
+
+//----------------- aliot functions -----------------//
+
+void aliot::connectToWiFi(char *ssid, const char *password)
+{
+    WiFiClass::mode(WIFI_STA);
+    WiFi.begin(ssid, password);
+    Serial.print("Connecting to WiFi ..");
+    while (WiFiClass::status() != WL_CONNECTED)
+    {
+        Serial.print(".");
+        delay(1000);
+    }
+
+    Serial.print("Connected to ");
+    Serial.println(WiFi.SSID());
+
+}
+
+
 
