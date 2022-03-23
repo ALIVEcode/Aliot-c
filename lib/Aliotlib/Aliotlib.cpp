@@ -13,6 +13,7 @@
 
 WebSocketClient aliotWebSocketClient;
 WiFiClient aliotClient;
+WiFiManager wm;
 
 /**
  * @brief This function should NOT be called manually
@@ -53,7 +54,6 @@ namespace aliot
      */
     bool connectToWiFi(const char *wifiName = "AliotWiFi", const char *wifiPassword = "1234")
     {
-        WiFiManager wm;
         bool connected;
         connected = wm.autoConnect(wifiName, wifiPassword);
         if (!connected)
@@ -73,10 +73,11 @@ namespace aliot
      *
      * @return `true` if alivecode likes you and `false` if you should be doing something else with your time!
      */
-    bool connectToAliveCode(const char *host = "alivecode.ca", const char *path = "/iotgateway/")
+    bool connectToAliveCode(const char *host = "alivecode.ca", const char *path = "/iotgateway/", int port = 8881)
     {
         aliotWebSocketClient.path = (char *)path;
         aliotWebSocketClient.host = (char *)host;
+        aliotClient.connect(host, port);
         bool connected = aliotWebSocketClient.handshake(aliotClient);
         if (connected)
         {
