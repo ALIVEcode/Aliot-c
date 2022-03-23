@@ -2,6 +2,7 @@
 #include <WiFiManager.h>
 #include <WebSocketClient.h>
 #include <WiFi.h>
+#include <Aliotlib.hpp>
 // Pin assignation
 #define LED_Status 2
 #define button 34
@@ -21,35 +22,16 @@ void setup()
     WiFi.mode(WIFI_STA);
 
     Serial.begin(115200);
-    WiFiManager wm;
 
-    wm.resetSettings();
-    bool res;
-    res = wm.autoConnect("AliveIoT", "12345678");
-    if (!res)
+    // wm.resetSettings();
+
+    bool res = aliot::connectToWiFi();
+    while (!res)
     {
-        Serial.println("Failed connection");
-    }
-    else
-    {
-        Serial.println("Connected");
-        Serial.println(WiFi.localIP());
-        digitalWrite(LED_Status, HIGH);
     }
 
-    if (client.connect("alivecode.ca", 8881))
-    {
-        Serial.println("Connected");
-    }
-    else
-    {
-        Serial.println("Connection failed.");
-        while (1)
-        {
-            delay(1000);
-            Serial.println("waiting");
-        }
-    }
+    Serial.println(WiFi.localIP());
+    digitalWrite(LED_Status, HIGH);
 
     webSocketClient.path = path;
     webSocketClient.host = host;
