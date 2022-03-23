@@ -7,6 +7,7 @@
 #include <WebSocketClient.h>
 #include <ArduinoJson.h>
 
+#define DEBUGGING 1
 #define ALIOT_FAIL \
     while (1)      \
     {              \
@@ -59,7 +60,18 @@ struct AliotObj
         JSON data;
         data["id"] = objectId;
         _sendEvent(EVT_CONNECT_OBJ, data);
-        aliotClient.setTimeout(20);
+        delay(1500);
+        JSON responseJson;
+        String response;
+        aliotWebSocketClient.getData(response);
+        while (!(response.length() > 0))
+        {
+            aliotWebSocketClient.getData(response);
+            deserializeJson(responseJson, response);
+#ifdef DEBUGGING
+            serializeJson(responseJson, Serial);
+#endif
+        }
     }
 
     inline bool update()
@@ -78,6 +90,8 @@ struct AliotObj
             deserializeJson(responseJson, response);
         }
     }
+
+private:
 };
 
 namespace aliot
