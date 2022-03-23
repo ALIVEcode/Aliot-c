@@ -9,6 +9,9 @@
 #define button 34
 #define led 22
 
+AliotObj ampoule{"e8f599b2-2806-47c2-9c0c-266bb91f89a0"};
+AliotProjet monProjet{"9cb50433-129e-4905-9144-366c31fade7c"};
+
 void setup()
 {
     pinMode(LED_Status, OUTPUT);
@@ -21,60 +24,37 @@ void setup()
     // wm.resetSettings();
 
     bool connected = aliot::connectToWiFi();
-    while (!connected)
-        ;
+    if (!connected)
+        ALIOT_FAIL
 
     digitalWrite(LED_Status, HIGH);
-    AliotObj ampoule{"e8f599b2-2806-47c2-9c0c-266bb91f89a0"};
 
-    if (aliot::connectToAliveCode())
-        ampoule.connect();
-    else
-    {
-        while (1)
-        {
-        }
-    }
+    if (!aliot::connectToAliveCode())
+        ALIOT_FAIL
+
+    ampoule.connect();
 }
 
-bool led_status = true;
 void loop()
 {
+    if (!ampoule.update())
+        return;
+
     if (digitalRead(button) == LOW)
     {
-        String data;
-        if (aliotClient.connected())
-        {
-            if (led_status)
-            {
-                data = String("{\"event\":\"update\",\"data\": {\"projectId\":\"50209e1b-1e1c-4df1-ad9a-3eaffdabed35\",\"fields\":{\"/document/led\": false}}}");
-                aliotWebSocketClient.sendData(data);
-                delay(2000);
-                Serial.println("Data sent");
-                aliotWebSocketClient.getData(data);
-                while (!(data.length() > 0))
-                {
-                    aliotWebSocketClient.getData(data);
-                }
-                Serial.println(data);
-                aliotClient.setTimeout(1);
-                led_status = false;
-            }
-            else if (!led_status)
-            {
-                data = String("{\"event\":\"update\",\"data\": {\"projectId\":\"50209e1b-1e1c-4df1-ad9a-3eaffdabed35\",\"fields\":{\"/document/led\": true}}}");
-                aliotWebSocketClient.sendData(data);
-                delay(2000);
-                Serial.println("Data sent");
-                aliotWebSocketClient.getData(data);
-                while (!(data.length() > 0))
-                {
-                    aliotWebSocketClient.getData(data);
-                }
-                Serial.println(data);
-                aliotClient.setTimeout(1);
-                led_status = true;
-            }
-        }
+        JSON fields;
+        fields["/document/LED"] = false;
+        fields["/document/Lumiere"] = "red";
+
+        monProjet.updateDoc(fields);
     }
+    else
+    {
+        JSON fields;
+        fields["/document/LED"] = true;
+        fields["/document/Lumiere"] = "green";
+
+        monProjet.updateDoc(fields);
+    }
+    delay(2000);
 }

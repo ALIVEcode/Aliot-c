@@ -7,9 +7,16 @@
 #include <WebSocketClient.h>
 #include <ArduinoJson.h>
 
+#define ALIOT_FAIL \
+    while (1)      \
+    {              \
+    }
+
+#define JSON StaticJsonDocument<1024>
+
 // events
 #define EVT_CONNECT_OBJ "connect_object"
-// #define EVNT_
+#define EVT_UPDATE "update"
 
 WebSocketClient aliotWebSocketClient;
 WiFiClient aliotClient;
@@ -20,9 +27,9 @@ WiFiManager wm;
  *
  * @param eventName
  */
-void _sendEvent(const char *eventName, StaticJsonDocument<1024> data)
+void _sendEvent(const char *eventName, JSON data)
 {
-    StaticJsonDocument<1024> event;
+    JSON event;
     event["event"] = eventName;
     event["data"] = data;
     String eventSerialized;
@@ -30,16 +37,46 @@ void _sendEvent(const char *eventName, StaticJsonDocument<1024> data)
     aliotWebSocketClient.sendData(eventSerialized);
 }
 
+struct AliotProjet
+{
+    const char *projectId;
+
+    void updateDoc(JSON fields)
+    {
+        JSON data;
+        data["projectId"] = projectId;
+        data["fields"] = fields;
+        _sendEvent(EVT_UPDATE, data);
+    }
+};
+
 struct AliotObj
 {
     const char *objectId;
 
     void connect()
     {
-        StaticJsonDocument<1024> data;
+        JSON data;
         data["id"] = objectId;
         _sendEvent(EVT_CONNECT_OBJ, data);
-        aliotClient.setTimeout(1);
+        aliotClient.setTimeout(20);
+    }
+
+    inline bool update()
+    {
+        return aliotClient.connected();
+    }
+
+    void _()
+    {
+        JSON responseJson;
+        String response;
+        aliotWebSocketClient.getData(response);
+        while (!(response.length() > 0))
+        {
+            aliotWebSocketClient.getData(response);
+            deserializeJson(responseJson, response);
+        }
     }
 };
 
