@@ -1,0 +1,1 @@
+g++ .\src\main.cpp .\lib\aliotlib.cpp -o main && main.exe
