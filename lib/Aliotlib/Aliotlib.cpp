@@ -4,9 +4,43 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiManager.h>
+#include <WebSocketClient.h>
+#include <ArduinoJson.h>
 
-WebSocketClient webSocketClient;
+// events
+#define EVT_CONNECT_OBJ "connect_object"
+// #define EVNT_
+
+WebSocketClient aliotWebSocketClient;
 WiFiClient aliotClient;
+
+/**
+ * @brief This function should NOT be called manually
+ *
+ * @param eventName
+ */
+void _sendEvent(const char *eventName, StaticJsonDocument<1024> data)
+{
+    StaticJsonDocument<1024> event;
+    event["event"] = eventName;
+    event["data"] = data;
+    String eventSerialized;
+    serializeJson(event, eventSerialized);
+    aliotWebSocketClient.sendData(eventSerialized);
+}
+
+struct AliotObj
+{
+    const char *objectId;
+
+    void connect()
+    {
+        StaticJsonDocument<1024> data;
+        data["id"] = objectId;
+        _sendEvent(EVT_CONNECT_OBJ, data);
+        aliotClient.setTimeout(1);
+    }
+};
 
 namespace aliot
 {
@@ -24,11 +58,11 @@ namespace aliot
         connected = wm.autoConnect(wifiName, wifiPassword);
         if (!connected)
         {
-            Serial.println("Connection failed");
+            Serial.println("Connection to WiFi failed");
         }
         else
         {
-            Serial.println("Connected");
+            Serial.println("Connected to WiFi");
             Serial.println(WiFi.localIP());
         }
         return connected;
@@ -39,18 +73,18 @@ namespace aliot
      *
      * @return `true` if alivecode likes you and `false` if you should be doing something else with your time!
      */
-    bool connectToAliveCode(char *host = "alivecode.ca", char *path = "/iotgateway/")
+    bool connectToAliveCode(const char *host = "alivecode.ca", const char *path = "/iotgateway/")
     {
-        webSocketClient.path = path;
-        webSocketClient.host = host;
-        bool connected = webSocketClient.handshake(aliotClient);
+        aliotWebSocketClient.path = (char *)path;
+        aliotWebSocketClient.host = (char *)host;
+        bool connected = aliotWebSocketClient.handshake(aliotClient);
         if (connected)
         {
-            Serial.println("Connection successful");
+            Serial.println("Connected to ALIVEcode");
         }
         else
         {
-            Serial.println("Connection failed");
+            Serial.println("Connection to ALIVEcode failed");
         }
         return connected;
     }
