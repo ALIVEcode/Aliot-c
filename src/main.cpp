@@ -2,17 +2,11 @@
 #include <WiFiManager.h>
 #include <WebSocketClient.h>
 #include <WiFi.h>
-#include <Aliotlib.hpp>
+#include <Aliotlib.cpp>
 // Pin assignation
 #define LED_Status 2
 #define button 34
 #define led 22
-
-char path[] = "/iotgateway/";
-char host[] = "alivecode.ca";
-
-WebSocketClient webSocketClient;
-WiFiClient client;
 
 void setup()
 {
@@ -25,19 +19,14 @@ void setup()
 
     // wm.resetSettings();
 
-    bool res = aliot::connectToWiFi();
-    while (!res)
-    {
-    }
+    bool connected = aliot::connectToWiFi();
+    while (!connected)
+        ;
 
-    Serial.println(WiFi.localIP());
     digitalWrite(LED_Status, HIGH);
 
-    webSocketClient.path = path;
-    webSocketClient.host = host;
-    if (webSocketClient.handshake(client))
+    if (aliot::connectToAliveCode())
     {
-        Serial.println("Handshake successful");
         String data;
 
         data = String("{\"event\": \"connect_object\", \"data\": {\"id\": \"6560d2db-84e1-4a1e-a68a-2827205f9cd1\"}}");
@@ -46,19 +35,18 @@ void setup()
     }
     else
     {
-        Serial.println("Handshake failed.");
         while (1)
-        {
-        }
+            ;
     }
 }
+
 bool led_status = true;
 void loop()
 {
     if (digitalRead(button) == LOW)
     {
         String data;
-        if (client.connected())
+        if (aliotClient.connected())
         {
             if (led_status)
             {
@@ -72,7 +60,7 @@ void loop()
                     webSocketClient.getData(data);
                 }
                 Serial.println(data);
-                client.setTimeout(1);
+                aliotClient.setTimeout(1);
                 led_status = false;
             }
             else if (!led_status)
@@ -87,7 +75,7 @@ void loop()
                     webSocketClient.getData(data);
                 }
                 Serial.println(data);
-                client.setTimeout(1);
+                aliotClient.setTimeout(1);
                 led_status = true;
             }
         }
