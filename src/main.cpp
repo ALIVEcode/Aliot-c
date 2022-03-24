@@ -9,8 +9,8 @@
 #define button 34
 #define led 22
 
-AliotObj ampoule{"e8f599b2-2806-47c2-9c0c-266bb91f89a0"};
-AliotProjet monProjet{"9cb50433-129e-4905-9144-366c31fade7c"};
+AliotObj ampoule("e8f599b2-2806-47c2-9c0c-266bb91f89a0");
+AliotProject monProject("9cb50433-129e-4905-9144-366c31fade7c");
 
 void setup()
 {
@@ -55,7 +55,7 @@ void loop()
         fields["/document/LED"] = false;
         fields["/document/Lumiere"] = "red";
 
-        monProjet.updateDoc(fields);
+        monProject.updateDoc(fields);
     }
     else
     {
@@ -63,7 +63,7 @@ void loop()
         fields["/document/LED"] = true;
         fields["/document/Lumiere"] = "green";
 
-        monProjet.updateDoc(fields);
+        monProject.updateDoc(fields);
     }
     delay(300);
 }

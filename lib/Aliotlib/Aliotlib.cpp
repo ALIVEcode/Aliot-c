@@ -7,7 +7,6 @@
 #include <WebSocketClient.h>
 #include <ArduinoJson.h>
 
-#define DEBUGGING 1
 #define ALIOT_FAIL \
     while (1)      \
     {              \
@@ -39,9 +38,14 @@ void _sendEvent(const char *eventName, JSON data)
     aliotWebSocketClient.sendData(eventSerialized);
 }
 
-struct AliotProjet
+struct AliotProject
 {
     const char *projectId;
+
+    AliotProject(const char *projectId)
+    {
+        this->projectId = projectId;
+    }
 
     void updateDoc(JSON fields)
     {
@@ -55,22 +59,18 @@ struct AliotProjet
 struct AliotObj
 {
     const char *objectId;
+    bool readyToGo = false;
+
+    AliotObj(const char *objectId)
+    {
+        this->objectId = objectId;
+    }
 
     void connect()
     {
         JSON data;
         data["id"] = objectId;
         _sendEvent(EVT_CONNECT_OBJ, data);
-        delay(1500);
-        JSON responseJson;
-        String response;
-        aliotWebSocketClient.getData(response);
-        while (!(response.length() > 0))
-        {
-            aliotWebSocketClient.getData(response);
-            deserializeJson(responseJson, response);
-            Serial.println(response);
-        }
     };
 
     /**
@@ -90,13 +90,35 @@ struct AliotObj
             // ping
             if (_res == "")
             {
+#ifdef DEBUGGING
                 Serial.println("Received ping");
                 Serial.println(R"(Sending pong... {"event": "pong"})");
+#endif
                 aliotWebSocketClient.sendData(R"({"event": "pong"})");
                 continue;
             }
             deserializeJson(response, _res);
-            // handle other responses
+
+            String event = String(response["event"].as<const char *>());
+            if (event == "connected" && !readyToGo)
+            {
+                // TODO register listeners
+                readyToGo = true;
+            }
+            else if (event == "")
+            {
+            }
+            switch (event == "error")
+            {
+                serializeJson(response, Serial);
+                continue;
+            }
+            // TODO handle errors
+
+            if (!readyToGo)
+                continue;
+
+            // TODO handle callbacks
         }
         return aliotClient.connected();
     }

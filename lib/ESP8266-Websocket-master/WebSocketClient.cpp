@@ -8,8 +8,6 @@
 #include "sha1.h"
 #include "Base64.h"
 
-#define DEBUGGING 1
-
 bool WebSocketClient::handshake(Client &client)
 {
 
