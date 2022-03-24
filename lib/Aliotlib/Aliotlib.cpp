@@ -85,10 +85,11 @@ struct AliotObj
         JSON response;
         while (aliotClient.connected() && aliotWebSocketClient.getData(_res))
         {
-            deserializeJson(response, _res);
+            Serial.println(_res);
 
-            if (response["event"] == "ping")
+            if (_res == "ping")
             {
+                deserializeJson(response, _res);
                 Serial.println("Received ping");
                 serializeJson(response, _res);
                 _sendEvent(EVT_PONG, {});
