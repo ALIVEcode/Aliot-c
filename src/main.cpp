@@ -65,5 +65,5 @@ void loop()
 
         monProjet.updateDoc(fields);
     }
-    delay(2000);
+    delay(300);
 }

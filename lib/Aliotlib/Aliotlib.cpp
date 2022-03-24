@@ -91,8 +91,8 @@ struct AliotObj
             if (_res == "")
             {
                 Serial.println("Received ping");
-                Serial.println("Sending pong...");
-                aliotWebSocketClient.sendData(_res);
+                Serial.println(R"(Sending pong... {"event": "pong"})");
+                aliotWebSocketClient.sendData(R"({"event": "pong"})");
                 continue;
             }
             deserializeJson(response, _res);
