@@ -14,6 +14,10 @@
 
 #define JSON StaticJsonDocument<1024>
 
+// TODO change those macros to send the print command to a virtual terminal (future IoT component)
+#define print(x) Serial.print(x)
+#define println(x) Serial.println(x)
+
 // events
 #define EVT_CONNECT_OBJ "connect_object"
 #define EVT_UPDATE "update"
@@ -106,15 +110,17 @@ struct AliotObj
             {
                 readyToGo = true;
                 // TODO register listeners
-                Serial.println("Connected to ALIVEcode");
+                println("Connected to ALIVEcode");
             }
             else if (event == "error")
             {
                 // TODO handle errors
-                Serial.print("ERROR: ");
-                serializeJson(response, Serial);
+                print("ERROR '");
+                print(event);
+                print("': ");
+                println(response["data"].as<const char *>());
                 continue;
-            }
+                        }
 
             if (!readyToGo)
                 continue;
@@ -140,12 +146,12 @@ namespace aliot
         connected = wm.autoConnect(wifiName, wifiPassword);
         if (!connected)
         {
-            Serial.println("Connection to WiFi failed");
+            println("Connection to WiFi failed");
         }
         else
         {
-            Serial.println("Connected to WiFi");
-            Serial.println(WiFi.localIP());
+            println("Connected to WiFi");
+            println(WiFi.localIP());
         }
         return connected;
     }
@@ -163,7 +169,7 @@ namespace aliot
         bool connected = aliotWebSocketClient.handshake(aliotClient);
         if (!connected)
         {
-            Serial.println("Connection to ALIVEcode failed");
+            println("Connection to ALIVEcode failed");
         }
         return connected;
     }

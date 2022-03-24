@@ -44,7 +44,7 @@ void loop()
         if (!msg)
         {
             msg = true;
-            Serial.println("Disconnected from ALIVEcode");
+            println("Disconnected from ALIVEcode");
         }
         return;
     }
