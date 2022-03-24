@@ -25,12 +25,12 @@ void setup()
 
     bool connected = aliot::connectToWiFi();
     if (!connected)
-        ALIOT_FAIL
+        END_PROGRAM
 
     digitalWrite(LED_Status, HIGH);
 
     if (!aliot::connectToAliveCode())
-        ALIOT_FAIL
+        END_PROGRAM
 
     ampoule.connect();
 }

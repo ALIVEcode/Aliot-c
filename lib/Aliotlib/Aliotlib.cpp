@@ -7,9 +7,9 @@
 #include <WebSocketClient.h>
 #include <ArduinoJson.h>
 
-#define ALIOT_FAIL \
-    while (1)      \
-    {              \
+#define END_PROGRAM \
+    while (1)       \
+    {               \
     }
 
 #define JSON StaticJsonDocument<1024>
@@ -85,8 +85,10 @@ struct AliotObj
         JSON response;
         while (aliotClient.connected() && aliotWebSocketClient.getData(_res))
         {
+#ifdef DEBUGGING
+            Serial.print("Received data: ");
             Serial.println(_res);
-
+#endif
             // ping
             if (_res == "")
             {
@@ -102,18 +104,17 @@ struct AliotObj
             String event = String(response["event"].as<const char *>());
             if (event == "connected" && !readyToGo)
             {
-                // TODO register listeners
                 readyToGo = true;
+                // TODO register listeners
+                Serial.println("Connected to ALIVEcode");
             }
-            else if (event == "")
+            else if (event == "error")
             {
-            }
-            switch (event == "error")
-            {
+                // TODO handle errors
+                Serial.print("ERROR: ");
                 serializeJson(response, Serial);
                 continue;
             }
-            // TODO handle errors
 
             if (!readyToGo)
                 continue;
@@ -160,11 +161,7 @@ namespace aliot
         aliotWebSocketClient.host = (char *)host;
         aliotClient.connect(host, port);
         bool connected = aliotWebSocketClient.handshake(aliotClient);
-        if (connected)
-        {
-            Serial.println("Connected to ALIVEcode");
-        }
-        else
+        if (!connected)
         {
             Serial.println("Connection to ALIVEcode failed");
         }
