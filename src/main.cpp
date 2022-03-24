@@ -7,6 +7,7 @@
 // Pin assignation
 #define LED_Status 2
 #define button 34
+#define RESET_BUTTON 33
 #define led 22
 
 AliotObj ampoule("e8f599b2-2806-47c2-9c0c-266bb91f89a0");
@@ -57,13 +58,6 @@ void loop()
 
         monProject.updateDoc(fields);
     }
-    else
-    {
-        JSON fields;
-        fields["/document/LED"] = true;
-        fields["/document/Lumiere"] = "green";
 
-        monProject.updateDoc(fields);
-    }
-    delay(300);
+    aliot::resetWiFiOnPress(RESET_BUTTON);
 }

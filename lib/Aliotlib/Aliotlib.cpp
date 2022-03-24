@@ -115,12 +115,12 @@ struct AliotObj
             else if (event == "error")
             {
                 // TODO handle errors
-                print("ERROR '");
+                print("Errror received '");
                 print(event);
                 print("': ");
                 println(response["data"].as<const char *>());
                 continue;
-                        }
+            }
 
             if (!readyToGo)
                 continue;
@@ -140,7 +140,7 @@ namespace aliot
      * @param wifiPassword
      * @return `true` if the esp32 is connected to the internet and `false` if the esp32 did not connect to the internet
      */
-    bool connectToWiFi(const char *wifiName = "AliotWiFi", const char *wifiPassword = "1234")
+    bool connectToWiFi(const char *wifiName = "AliotWiFi", const char *wifiPassword = "password")
     {
         bool connected;
         connected = wm.autoConnect(wifiName, wifiPassword);
@@ -172,6 +172,16 @@ namespace aliot
             println("Connection to ALIVEcode failed");
         }
         return connected;
+    }
+
+    bool resetWiFiOnPress(uint8_t button)
+    {
+        if (digitalRead(button))
+        {
+            wm.resetSettings();
+            return aliot::connectToWiFi();
+        }
+        return true;
     }
 };
 
