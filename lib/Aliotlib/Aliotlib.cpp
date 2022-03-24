@@ -174,9 +174,9 @@ namespace aliot
         return connected;
     }
 
-    bool resetWiFiOnPress(uint8_t button)
+    bool resetWiFiOnPress(uint8_t button, int activatedState = LOW)
     {
-        if (digitalRead(button))
+        if (digitalRead(button) == activatedState)
         {
             wm.resetSettings();
             return aliot::connectToWiFi();

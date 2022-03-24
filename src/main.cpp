@@ -18,11 +18,10 @@ void setup()
     pinMode(LED_Status, OUTPUT);
     pinMode(led, OUTPUT);
     pinMode(button, INPUT);
+    pinMode(RESET_BUTTON, INPUT);
     WiFi.mode(WIFI_STA);
 
     Serial.begin(115200);
-
-    // wm.resetSettings();
 
     bool connected = aliot::connectToWiFi();
     if (!connected)
@@ -59,5 +58,6 @@ void loop()
         monProject.updateDoc(fields);
     }
 
-    aliot::resetWiFiOnPress(RESET_BUTTON);
+    if (!aliot::resetWiFiOnPress(RESET_BUTTON))
+        END_PROGRAM
 }
