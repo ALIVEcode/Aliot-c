@@ -35,10 +35,19 @@ void setup()
     ampoule.connect();
 }
 
+bool msg = false;
+
 void loop()
 {
     if (!ampoule.update())
+    {
+        if (!msg)
+        {
+            msg = true;
+            Serial.println("Disconnected from ALIVEcode");
+        }
         return;
+    }
 
     if (digitalRead(button) == LOW)
     {

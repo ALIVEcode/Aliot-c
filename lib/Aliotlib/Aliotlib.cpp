@@ -89,7 +89,10 @@ struct AliotObj
 
             if (response["event"] == "ping")
             {
+                Serial.println("Received ping");
+                serializeJson(response, _res);
                 _sendEvent(EVT_PONG, {});
+                Serial.println("Sending pong...");
                 continue;
             }
             // handle other responses
