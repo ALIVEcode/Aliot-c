@@ -87,15 +87,15 @@ struct AliotObj
         {
             Serial.println(_res);
 
-            if (_res == "ping")
+            // ping
+            if (_res == "")
             {
-                deserializeJson(response, _res);
                 Serial.println("Received ping");
-                serializeJson(response, _res);
-                _sendEvent(EVT_PONG, {});
                 Serial.println("Sending pong...");
+                aliotWebSocketClient.sendData(_res);
                 continue;
             }
+            deserializeJson(response, _res);
             // handle other responses
         }
         return aliotClient.connected();
