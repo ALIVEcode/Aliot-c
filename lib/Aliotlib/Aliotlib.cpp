@@ -18,6 +18,7 @@
 // events
 #define EVT_CONNECT_OBJ "connect_object"
 #define EVT_UPDATE "update"
+#define EVT_PONG "pong"
 
 WebSocketClient aliotWebSocketClient;
 WiFiClient aliotClient;
@@ -68,30 +69,33 @@ struct AliotObj
         {
             aliotWebSocketClient.getData(response);
             deserializeJson(responseJson, response);
-#ifdef DEBUGGING
-            serializeJson(responseJson, Serial);
-#endif
+            Serial.println(response);
         }
-    }
+    };
 
-    inline bool update()
+    /**
+     * @brief Handles the messages sent by the server and calls the relevent functions
+     *
+     * @return true
+     * @return false
+     */
+    bool update()
     {
+        String _res;
+        JSON response;
+        while (aliotClient.connected() && aliotWebSocketClient.getData(_res))
+        {
+            deserializeJson(response, _res);
+
+            if (response["event"] == "ping")
+            {
+                _sendEvent(EVT_PONG, {});
+                continue;
+            }
+            // handle other responses
+        }
         return aliotClient.connected();
     }
-
-    void _()
-    {
-        JSON responseJson;
-        String response;
-        aliotWebSocketClient.getData(response);
-        while (!(response.length() > 0))
-        {
-            aliotWebSocketClient.getData(response);
-            deserializeJson(responseJson, response);
-        }
-    }
-
-private:
 };
 
 namespace aliot
