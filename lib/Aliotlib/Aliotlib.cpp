@@ -134,12 +134,12 @@ struct AliotObj
     }
 };
 
-struct Pin
+struct PWM_Pin
 {
     int number;
     int channel;
 
-    Pin(int number, int channel = 0, uint8_t mode = OUTPUT)
+    PWM_Pin(int number, int channel = 0, uint8_t mode = OUTPUT)
     {
         this->number = number;
         this->channel = channel;
