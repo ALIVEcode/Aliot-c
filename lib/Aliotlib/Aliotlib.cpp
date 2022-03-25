@@ -139,10 +139,11 @@ struct PWM_Pin
     int number;
     int channel;
 
-    PWM_Pin(int number, int channel = 0, uint8_t mode = OUTPUT)
+    PWM_Pin(int number, uint8_t mode = OUTPUT)
     {
         this->number = number;
-        this->channel = channel;
+        this->channel = _channelNum;
+        _channelNum++;
         ledcSetup(this->channel, FREQUENCY, RES);
         ledcAttachPin(number, this->channel);
         pinMode(number, mode);
@@ -152,7 +153,12 @@ struct PWM_Pin
     {
         ledcWrite(this->channel, value);
     }
+
+private:
+    static int _channelNum;
 };
+
+int PWM_Pin::_channelNum = 0;
 
 namespace aliot
 {
