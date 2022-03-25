@@ -2,7 +2,21 @@
 #define ALIOTLIB_VOITURE_H
 #include <Arduino.h>
 
-#define for_i(x, i) for (byte i = 0; i < sizeof(x); i++)
+#define for_i(x, i) for (int i = 0; i < sizeof(x); i++)
+
+enum Wheel
+{
+    FL_WHEEL = 0,
+    FR_WHEEL = 2,
+    BL_WHEEL = 4,
+    BR_WHEEL = 6
+};
+
+enum Direction
+{
+    CLOCKWISE,
+    COUNTER_CLOCKWISE
+};
 
 struct Voiture
 {
@@ -17,6 +31,12 @@ struct Voiture
     {
         for_i(pins, i)
             pinMode(pins[i], OUTPUT);
+    }
+
+    void turnWheel(Wheel wheel, Direction direction)
+    {
+        digitalWrite(pins[wheel], direction ? LOW : HIGH);
+        digitalWrite(pins[wheel + 1], direction ? HIGH : LOW);
     }
 
     void forward(void)
@@ -34,32 +54,18 @@ struct Voiture
     // TODO left and right (I won't do it, ugh gnnnnn)
     void turnRight(void)
     {
-        digitalWrite(pins[0], HIGH);
-        digitalWrite(pins[1], LOW);
-
-        digitalWrite(pins[4], HIGH);
-        digitalWrite(pins[5], LOW);
-
-        digitalWrite(pins[2], LOW);
-        digitalWrite(pins[3], HIGH);
-
-        digitalWrite(pins[6], LOW);
-        digitalWrite(pins[7], HIGH);
+        turnWheel(Wheel::FL_WHEEL, Direction::CLOCKWISE);
+        turnWheel(Wheel::BL_WHEEL, Direction::CLOCKWISE);
+        turnWheel(Wheel::FR_WHEEL, Direction::COUNTER_CLOCKWISE);
+        turnWheel(Wheel::BR_WHEEL, Direction::COUNTER_CLOCKWISE);
     }
 
     void turnLeft(void)
     {
-        digitalWrite(pins[0], LOW);
-        digitalWrite(pins[1], HIGH);
-
-        digitalWrite(pins[4], LOW);
-        digitalWrite(pins[5], HIGH);
-
-        digitalWrite(pins[2], HIGH);
-        digitalWrite(pins[3], LOW);
-
-        digitalWrite(pins[6], HIGH);
-        digitalWrite(pins[7], LOW);
+        turnWheel(Wheel::FL_WHEEL, Direction::COUNTER_CLOCKWISE);
+        turnWheel(Wheel::BL_WHEEL, Direction::COUNTER_CLOCKWISE);
+        turnWheel(Wheel::FR_WHEEL, Direction::CLOCKWISE);
+        turnWheel(Wheel::BR_WHEEL, Direction::CLOCKWISE);
     }
 };
 
