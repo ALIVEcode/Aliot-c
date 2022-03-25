@@ -7,27 +7,47 @@
 
 // Pin assignation
 #define LED_Status 2
-#define button 34
-#define RESET_BUTTON 33
-#define led 22
+// #define button 34
+// #define RESET_BUTTON 33
+// #define led 22
 
-#define MBLA 12 // directionnal pin
+//*Motor DirectionPin front left
+#define EnableFL 15 // Enable pin connected to PWM
+#define MFLA 23     // Motor Direction
+#define MFLB 22     // Directional PIN
+//*Motor DirectionPin Front Right
+#define EnableFR 4 // Enable pin connected to PWM
+#define MFRA 21    // Directional PIN
+#define MFRB 19    // Directional PIN
+//*Motor DirectionPin Back Left
+#define EnableBL 13 // Enable pin connected to PWM
+#define MBLA 12     // Directional PIN
+#define MBLB 14     // Directional PIN
+//*Motor DirectionPin Back Right
+#define EnableBR 32 // Enable pin connected to PWM
+#define MBRA 33     // Directional PIN
+#define MBRB 25     // Directional PIN
 
-PWM_Pin mbla(MBLA);
+//*Creation de GPIO PWM
+PWM_Pin MEnFL(EnableFL);
+PWM_Pin MEnFR(EnableFR);
+PWM_Pin MEnBL(EnableBL);
+PWM_Pin MEnBR(EnableBR);
 
-AliotObj ampoule("e8f599b2-2806-47c2-9c0c-266bb91f89a0");
-AliotProject monProject("9cb50433-129e-4905-9144-366c31fade7c");
+//! #define pas obligatoire pour assigner un GPIO
+byte pins[]{MFLA, MFLB, MFRA, MFRB, MBLA, MBLB, MBRA, MBRB}; // Assignation GPIO direction des moteurs
+Voiture maVoiture(pins);                                     // Initialization
 
-byte pins[]{1, 2, 3, 4, 5, 6, 7, 8};
-
-Voiture maVoiture(pins);
+AliotObj ampoule("e8f599b2-2806-47c2-9c0c-266bb91f89a0");        // ID de l'objet
+AliotProject monProject("9cb50433-129e-4905-9144-366c31fade7c"); // ID du projet
 
 void setup()
 {
     pinMode(LED_Status, OUTPUT);
-    pinMode(led, OUTPUT);
-    pinMode(button, INPUT);
-    pinMode(RESET_BUTTON, INPUT);
+    maVoiture.init();
+    // pinMode(led, OUTPUT);
+    // pinMode(button, INPUT);
+    // pinMode(RESET_BUTTON, INPUT);
 
     WiFi.mode(WIFI_STA);
 
@@ -58,16 +78,39 @@ void loop()
         }
         return;
     }
+    MEnFL.analogWrite(170);
+    MEnFR.analogWrite(170);
+    MEnBL.analogWrite(170);
+    MEnBR.analogWrite(170);
 
-    if (digitalRead(button) == LOW)
-    {
-        JSON fields;
-        fields["/document/LED"] = false;
-        fields["/document/Lumiere"] = "red";
+    maVoiture.turnLeft();
+    println("turn Right");
 
-        monProject.updateDoc(fields);
-    }
+    delay(2000);
 
-    if (!aliot::resetWiFiOnPress(RESET_BUTTON))
-        END_PROGRAM
+    maVoiture.turnRight();
+    println("turn left");
+
+    delay(2000);
+
+    maVoiture.forward();
+    println("turn left");
+
+    delay(2000);
+
+    maVoiture.turnRight();
+    println("turn left");
+
+    delay(2000);
+
+    maVoiture.backward();
+    println("turn left");
+
+    //     JSON fields;
+    //     fields["/document/LED"] = false;
+    //     fields["/document/Lumiere"] = "red";
+    //     monProject.updateDoc(fields);
+
+    // if (!aliot::resetWiFiOnPress(RESET_BUTTON))
+    //     END_PROGRAM
 }

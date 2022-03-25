@@ -149,7 +149,7 @@ struct PWM_Pin
         pinMode(number, mode);
     }
 
-    void write(int value)
+    void analogWrite(int value)
     {
         ledcWrite(this->channel, value);
     }
