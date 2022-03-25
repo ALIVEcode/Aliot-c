@@ -139,11 +139,15 @@ struct PWM_Pin
     int number;
     int channel;
 
-    PWM_Pin(int number, uint8_t mode = OUTPUT)
+    PWM_Pin(int number)
     {
         this->number = number;
         this->channel = _channelNum;
         _channelNum++;
+    }
+
+    void init(uint8_t mode = OUTPUT)
+    {
         ledcSetup(this->channel, FREQUENCY, RES);
         ledcAttachPin(number, this->channel);
         pinMode(number, mode);
