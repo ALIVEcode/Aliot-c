@@ -25,8 +25,6 @@ void setup()
     pinMode(button, INPUT);
     pinMode(RESET_BUTTON, INPUT);
 
-    mbla.write(720);
-
     WiFi.mode(WIFI_STA);
 
     Serial.begin(115200);

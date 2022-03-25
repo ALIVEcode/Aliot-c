@@ -139,12 +139,13 @@ struct Pin
     int number;
     int channel;
 
-    Pin(int number, int channel = 0)
+    Pin(int number, int channel = 0, uint8_t mode = OUTPUT)
     {
         this->number = number;
         this->channel = channel;
         ledcSetup(this->channel, FREQUENCY, RES);
         ledcAttachPin(number, this->channel);
+        pinMode(number, mode);
     }
 
     void write(int value)
@@ -197,7 +198,7 @@ namespace aliot
         return connected;
     }
 
-    bool resetWiFiOnPress(uint8_t button, int activatedState = LOW)
+    bool resetWiFiOnPress(uint8_t button, uint8_t activatedState = LOW)
     {
         if (digitalRead(button) == activatedState)
         {
