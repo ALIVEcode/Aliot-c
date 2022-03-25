@@ -10,15 +10,23 @@
 #define RESET_BUTTON 33
 #define led 22
 
+#define MBLA 12 // directionnal pin
+
+Pin mbla(MBLA);
+
 AliotObj ampoule("e8f599b2-2806-47c2-9c0c-266bb91f89a0");
 AliotProject monProject("9cb50433-129e-4905-9144-366c31fade7c");
 
 void setup()
 {
+
     pinMode(LED_Status, OUTPUT);
     pinMode(led, OUTPUT);
     pinMode(button, INPUT);
     pinMode(RESET_BUTTON, INPUT);
+
+    mbla.write(720);
+
     WiFi.mode(WIFI_STA);
 
     Serial.begin(115200);

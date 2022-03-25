@@ -14,6 +14,9 @@
 
 #define JSON StaticJsonDocument<1024>
 
+#define FREQUENCY 5000
+#define RES 8
+
 // TODO change those macros to send the print command to a virtual terminal (future IoT component)
 #define print(x) Serial.print(x)
 #define println(x) Serial.println(x)
@@ -131,8 +134,28 @@ struct AliotObj
     }
 };
 
+struct Pin
+{
+    int number;
+    int channel;
+
+    Pin(int number, int channel = 0)
+    {
+        this->number = number;
+        this->channel = channel;
+        ledcSetup(this->channel, FREQUENCY, RES);
+        ledcAttachPin(number, this->channel);
+    }
+
+    void write(int value)
+    {
+        ledcWrite(this->channel, value);
+    }
+};
+
 namespace aliot
 {
+
     /**
      * @brief Tries to connect to the internet. Returns false in case of failure and true in case of success
      *
