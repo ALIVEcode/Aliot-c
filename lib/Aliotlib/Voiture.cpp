@@ -2,7 +2,7 @@
 #define ALIOTLIB_VOITURE_H
 #include <Arduino.h>
 
-#define for_i(x, i) for (byte i = 0; i < sizeof(x); i++)
+#define for_i(x, i) for (int i = 0; i < sizeof(x); i++)
 
 struct Voiture
 {

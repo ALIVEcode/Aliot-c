@@ -45,6 +45,11 @@ void setup()
 {
     pinMode(LED_Status, OUTPUT);
     maVoiture.init();
+    MEnFL.init();
+    MEnFR.init();
+    MEnBL.init();
+    MEnBR.init();
+
     // pinMode(led, OUTPUT);
     // pinMode(button, INPUT);
     // pinMode(RESET_BUTTON, INPUT);
@@ -94,17 +99,16 @@ void loop()
     delay(2000);
 
     maVoiture.forward();
-    println("turn left");
+    println("forward");
 
     delay(2000);
 
     maVoiture.turnRight();
-    println("turn left");
+    println("turn Right");
 
     delay(2000);
-
     maVoiture.backward();
-    println("turn left");
+    println("Backward");
 
     //     JSON fields;
     //     fields["/document/LED"] = false;
