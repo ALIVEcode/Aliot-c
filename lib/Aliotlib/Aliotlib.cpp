@@ -6,6 +6,7 @@
 #include <WiFiManager.h>
 #include <WebSocketClient.h>
 #include <ArduinoJson.h>
+#include <Vector.cpp>
 
 #define END_PROGRAM \
     while (1)       \
@@ -45,6 +46,15 @@ void _sendEvent(const char *eventName, JSON data)
     aliotWebSocketClient.sendData(eventSerialized);
 }
 
+/** ActionListener
+ *
+ */
+struct ActionListener
+{
+    const char *eventName;
+    void (*onAction)(JSON data);
+};
+
 struct AliotProject
 {
     const char *projectId;
@@ -67,6 +77,7 @@ struct AliotObj
 {
     const char *objectId;
     bool readyToGo = false;
+    Vector<ActionListener> actionListeners = Vector<ActionListener>(10);
 
     AliotObj(const char *objectId)
     {
@@ -129,8 +140,28 @@ struct AliotObj
                 continue;
 
             // TODO handle callbacks
+            if (event == "action")
+            {
+                JSON data = response["data"];
+                String action = data["protocol_id"].as<const char *>();
+                for (int i = 0; i < actionListeners.getSize(); i++)
+                {
+                    if (String(actionListeners.get(i).eventName) == action)
+                    {
+                        actionListeners.get(i).onAction(data);
+                        break;
+                    }
+                }
+            }
         }
         return aliotClient.connected();
+    }
+
+    void onAction(const char *action, void (*callback)(JSON data))
+    {
+        // TODO register callbacks
+        ActionListener listener = ActionListener{action, callback};
+        actionListeners.add(listener);
     }
 };
 
