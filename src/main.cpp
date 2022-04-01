@@ -38,8 +38,7 @@ PWM_Pin MEnBR(EnableBR);
 byte pins[]{MFLA, MFLB, MFRA, MFRB, MBLA, MBLB, MBRA, MBRB}; // Assignation GPIO direction des moteurs
 Voiture maVoiture(pins);                                     // Initialization
 
-AliotObj ampoule("e8f599b2-2806-47c2-9c0c-266bb91f89a0");        // ID de l'objet
-AliotProject monProject("9cb50433-129e-4905-9144-366c31fade7c"); // ID du projet
+AliotObj ampoule("e8f599b2-2806-47c2-9c0c-266bb91f89a0"); // ID de l'objet
 
 void setup()
 {

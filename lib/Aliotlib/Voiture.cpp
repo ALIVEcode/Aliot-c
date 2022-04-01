@@ -51,7 +51,6 @@ struct Voiture
             digitalWrite(pins[i], i % 2 == 0 ? LOW : HIGH);
     }
 
-    // TODO left and right (I won't do it, ugh gnnnnn)
     void turnRight(void)
     {
         turnWheel(Wheel::FL_WHEEL, Direction::CLOCKWISE);

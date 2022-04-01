@@ -30,6 +30,12 @@ WebSocketClient aliotWebSocketClient;
 WiFiClient aliotClient;
 WiFiManager wm;
 
+struct ActionListener
+{
+    String event;
+    void (*callback)(JSON data);
+};
+
 /**
  * @brief This function should NOT be called manually
  *
@@ -44,24 +50,6 @@ void _sendEvent(const char *eventName, JSON data)
     serializeJson(event, eventSerialized);
     aliotWebSocketClient.sendData(eventSerialized);
 }
-
-struct AliotProject
-{
-    const char *projectId;
-
-    AliotProject(const char *projectId)
-    {
-        this->projectId = projectId;
-    }
-
-    void updateDoc(JSON fields)
-    {
-        JSON data;
-        data["projectId"] = projectId;
-        data["fields"] = fields;
-        _sendEvent(EVT_UPDATE, data);
-    }
-};
 
 struct AliotObj
 {
@@ -132,8 +120,30 @@ struct AliotObj
         }
         return aliotClient.connected();
     }
+
+    void updateProjectDoc(JSON fields)
+    {
+        JSON data;
+        data["objectId"] = objectId;
+        data["fields"] = fields;
+        _sendEvent(EVT_UPDATE, data);
+    }
+
+    void onAction(const char *action, void (*callback)(JSON data))
+    {
+        // TODO register callback
+        // ActionListener listener = ActionListener{action, callback};
+        // if (actionListeners == NULL)
+        //     actionListeners = List_new();
+        // List_add(actionListeners, listener);
+    }
 };
 
+/**
+ * @brief PWM pin
+ *
+ *
+ */
 struct PWM_Pin
 {
     int number;
