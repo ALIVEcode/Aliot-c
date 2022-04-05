@@ -18,6 +18,14 @@
 #define RES 8
 
 // TODO change those macros to send the print command to a virtual terminal (future IoT component)
+
+#define debugPrintln(x)
+#define debugPrint(x)
+#ifdef DEBUGGING
+#define debugPrintln(x) Serial.println(x)
+#define debugPrint(x) Serial.println(x)
+#endif
+
 #define print(x) Serial.print(x)
 #define println(x) Serial.println(x)
 
@@ -80,17 +88,13 @@ struct AliotObj
         JSON response;
         while (aliotClient.connected() && aliotWebSocketClient.getData(_res))
         {
-#ifdef DEBUGGING
-            Serial.print("Received data: ");
-            Serial.println(_res);
-#endif
+            debugPrint("Received data: ");
+            debugPrintln(_res);
             // ping
             if (_res == "")
             {
-#ifdef DEBUGGING
-                Serial.println("Received ping");
-                Serial.println(R"(Sending pong... {"event": "pong"})");
-#endif
+                debugPrintln("Received ping");
+                debugPrintln(R"(Sending pong... {"event": "pong"})");
                 aliotWebSocketClient.sendData(R"({"event": "pong"})");
                 continue;
             }
@@ -117,7 +121,7 @@ struct AliotObj
                 continue;
 
             // TODO handle callbacks
-        }
+                }
         return aliotClient.connected();
     }
 
@@ -132,10 +136,6 @@ struct AliotObj
     void onAction(const char *action, void (*callback)(JSON data))
     {
         // TODO register callback
-        // ActionListener listener = ActionListener{action, callback};
-        // if (actionListeners == NULL)
-        //     actionListeners = List_new();
-        // List_add(actionListeners, listener);
     }
 };
 
