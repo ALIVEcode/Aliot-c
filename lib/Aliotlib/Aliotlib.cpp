@@ -32,6 +32,7 @@
 // events
 #define EVT_CONNECT_OBJ "connect_object"
 #define EVT_UPDATE "update"
+#define EVT_ON_RECV "receive_action"
 #define EVT_PONG "pong"
 
 WebSocketClient aliotWebSocketClient;
@@ -63,6 +64,9 @@ struct AliotObj
 {
     const char *objectId;
     bool readyToGo = false;
+    // TODO a verifier
+    ActionListener actions[20];
+    int inActionsListeners = 0;
 
     AliotObj(const char *objectId)
     {
@@ -121,6 +125,19 @@ struct AliotObj
                 continue;
 
             // TODO handle callbacks
+            if(event == EVT_ON_RECV)
+            {
+                const char *id = response["data"]["id"];
+                JSON value = response["data"]["value"];
+                
+                for (int i = 0; i < 20; i++) {
+                    if (this->actions[i].event == id) 
+                    {
+                        this->actions[i].callback(value);
+                    }
+                }
+            }
+
                 }
         return aliotClient.connected();
     }
@@ -133,9 +150,12 @@ struct AliotObj
         _sendEvent(EVT_UPDATE, data);
     }
 
-    void onAction(const char *action, void (*callback)(JSON data))
+    void registerAction(const char *action, void (*callback)(JSON data))
     {
         // TODO register callback
+        ActionListener actionListener{action, callback};
+
+        this->actions[this->inActionsListeners++] = actionListener;
     }
 };
 
