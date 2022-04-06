@@ -45,22 +45,22 @@ AliotObj monObjet("3a92c5b6-bd4f-4dd5-b531-6cfcc04971d7"); // ID de l'objet
 
 void forward(AliotObjRef obj, JSON data)
 {
-    AliotObj *iotObj = AliotObjFromObjRef(obj);
+    maVoiture.forward(data["speed"]);
 }
 
 void backward(AliotObjRef obj, JSON data)
 {
-    AliotObj *iotObj = AliotObjFromObjRef(obj);
+    maVoiture.backward(data["speed"]);
 }
 
 void left(AliotObjRef obj, JSON data)
 {
-    AliotObj *iotObj = AliotObjFromObjRef(obj);
+    maVoiture.turnLeft(data["speed"]);
 }
 
 void right(AliotObjRef obj, JSON data)
 {
-    AliotObj *iotObj = AliotObjFromObjRef(obj);
+    maVoiture.turnRight(data["speed"]);
 }
 
 void setup()

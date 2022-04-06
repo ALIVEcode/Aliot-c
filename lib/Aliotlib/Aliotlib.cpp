@@ -31,6 +31,7 @@
 
 #define print(x) Serial.print(x)
 #define println(x) Serial.println(x)
+#define printJSON(x) serializeJson(x, Serial)
 
 // get back aliotObj
 typedef void *AliotObjRef;
@@ -162,7 +163,15 @@ struct AliotObj
                 {
                     if (this->actions[i].event == id)
                     {
-                        this->actions[i].callback(this, value);
+                        try
+                        {
+                            this->actions[i].callback(this, value);
+                        }
+                        catch (int e)
+                        {
+                            print("Error :");
+                            printJSON(value);
+                        }
                     }
                 }
             }
