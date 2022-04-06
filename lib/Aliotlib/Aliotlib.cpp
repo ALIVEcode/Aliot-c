@@ -18,12 +18,15 @@
 #define RES 8
 
 // TODO change those macros to send the print command to a virtual terminal (future IoT component)
-
+#define DEBUGGING
+#ifdef DEBUGGING
+#define debugPrintln(x) println(x)
+#define debugPrint(x) print(x)
+#define debugPrintJSON(x) serializeJson(x, Serial)
+#else
 #define debugPrintln(x)
 #define debugPrint(x)
-#ifdef DEBUGGING
-#define debugPrintln(x) Serial.println(x)
-#define debugPrint(x) Serial.println(x)
+#define debugPrintJSON(x)
 #endif
 
 #define print(x) Serial.print(x)
@@ -31,9 +34,12 @@
 
 // events
 #define EVT_CONNECT_OBJ "connect_object"
+#define EVT_CONNECT_SUCCESS "connect_success"
+#define EVT_ERROR "error"
 #define EVT_UPDATE "update"
 #define EVT_ON_RECV "receive_action"
 #define EVT_PONG "pong"
+#define EVT_PING "ping"
 
 WebSocketClient aliotWebSocketClient;
 WiFiClient aliotClient;
@@ -41,8 +47,9 @@ WiFiManager wm;
 
 struct ActionListener
 {
-    String event;
-    void (*callback)(JSON data);
+    int event;
+    // String event;
+    void (*callback)(AliotObj object, JSON data);
 };
 
 /**
@@ -94,27 +101,28 @@ struct AliotObj
         {
             debugPrint("Received data: ");
             debugPrintln(_res);
+            deserializeJson(response, _res);
+            String event = String(response["event"].as<const char *>());
+
             // ping
-            if (_res == "")
+            if (event == EVT_PING)
             {
                 debugPrintln("Received ping");
                 debugPrintln(R"(Sending pong... {"event": "pong"})");
                 aliotWebSocketClient.sendData(R"({"event": "pong"})");
                 continue;
             }
-            deserializeJson(response, _res);
 
-            String event = String(response["event"].as<const char *>());
-            if (event == "connected" && !readyToGo)
+            if (event == EVT_CONNECT_SUCCESS && !readyToGo)
             {
                 readyToGo = true;
                 // TODO register listeners
                 println("Connected to ALIVEcode");
             }
-            else if (event == "error")
+            else if (event == EVT_ERROR)
             {
                 // TODO handle errors
-                print("Errror received '");
+                print("Error received '");
                 print(event);
                 print("': ");
                 println(response["data"].as<const char *>());
@@ -123,22 +131,26 @@ struct AliotObj
 
             if (!readyToGo)
                 continue;
-
+            debugPrintln(event);
             // TODO handle callbacks
-            if(event == EVT_ON_RECV)
+            if (event == EVT_ON_RECV)
             {
-                const char *id = response["data"]["id"];
+                int id = response["data"]["id"];
+                debugPrintln(id);
+                // const char *id = response["data"]["id"];
                 JSON value = response["data"]["value"];
-                
-                for (int i = 0; i < 20; i++) {
-                    if (this->actions[i].event == id) 
+                debugPrintJSON(value);
+                debugPrintln("");
+
+                for (int i = 0; i < 20; i++)
+                {
+                    if (this->actions[i].event == id)
                     {
-                        this->actions[i].callback(value);
+                        this->actions[i].callback(*this, value);
                     }
                 }
             }
-
-                }
+        }
         return aliotClient.connected();
     }
 
@@ -150,7 +162,8 @@ struct AliotObj
         _sendEvent(EVT_UPDATE, data);
     }
 
-    void registerAction(const char *action, void (*callback)(JSON data))
+    // void registerAction(const char *action, void (*callback)(JSON data))
+    void registerAction(int action, void (*callback)(AliotObj object, JSON data))
     {
         // TODO register callback
         ActionListener actionListener{action, callback};
