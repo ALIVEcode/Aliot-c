@@ -36,7 +36,7 @@ Robot maVoiture(enablePins, directionalPins);
 
 rangeSensor range1(trigPin, echoPin);
 
-AliotObj monObjet("3a92c5b6-bd4f-4dd5-b531-6cfcc04971d7"); // ID de l'objet
+AliotObj monObjet("c0dd93ff-a17b-46c5-95cc-6a3ebb2f33bf"); // ID de l'objet
 
 #define FORWARD 10
 #define BACKWARD 20
@@ -62,18 +62,20 @@ void right(AliotObjRef obj, JSON data)
 {
     maVoiture.turnRight(data["speed"]);
 }
-
 void setup()
 {
     systems_initialize();
     range1.init();
     maVoiture.init();
+    pinMode(2, OUTPUT);
     bool connected = aliot::connectToWiFi();
     if (!connected)
         END_PROGRAM
 
-    if (!aliot::connectToAliveCode("10.0.0.45", "/"))
+    if (!aliot::connectToAliveCode("192.168.0.102", "/"))
         END_PROGRAM
+
+    digitalWrite(2, HIGH);
 
     monObjet.connect();
 
@@ -101,7 +103,7 @@ void loop()
     do
     {
         distance = range1.read();
-        println(distance);
+        // println(distance);
 
     } while (distance >= 15);
 

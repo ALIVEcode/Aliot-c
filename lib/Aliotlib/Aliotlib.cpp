@@ -116,16 +116,16 @@ struct AliotObj
         JSON response;
         while (aliotClient.connected() && aliotWebSocketClient.getData(_res))
         {
-            // debugPrint("Received data: ");
-            // debugPrintln(_res);
+            debugPrint("Received data: ");
+            debugPrintln(_res);
             deserializeJson(response, _res);
             String event = String(response["event"].as<const char *>());
 
             // ping
-            if (event == EVT_PING)
+            if (event == EVT_PING || event == "")
             {
-                // debugPrintln("Received ping");
-                // debugPrintln(R"(Sending pong... {"event": "pong"})");
+                debugPrintln("Received ping");
+                debugPrintln(R"(Sending pong... {"event": "pong"})");
                 aliotWebSocketClient.sendData(R"({"event": "pong"})");
                 continue;
             }
@@ -135,6 +135,7 @@ struct AliotObj
                 readyToGo = true;
                 // TODO register listeners
                 println("Connected to ALIVEcode");
+                continue;
             }
             else if (event == EVT_ERROR)
             {
@@ -171,6 +172,7 @@ struct AliotObj
                         {
                             print("Error :");
                             printJSON(value);
+                            println("");
                         }
                     }
                 }
@@ -241,10 +243,11 @@ namespace aliot
      * @param wifiPassword
      * @return `true` if the esp32 is connected to the internet and `false` if the esp32 did not connect to the internet
      */
-    bool connectToWiFi(char *wifi = "AliotWiFi", char *password = "password")
+    bool connectToWiFi(const char *wifi = "AliotWiFi", const char *password = "password")
     {
-        wifiName = wifi;
-        wifiPassword = password;
+        wifiName = (char *)wifi;
+        wifiPassword = (char *)password;
+        // wm.resetSettings();
         bool connected;
         connected = wm.autoConnect(wifiName, wifiPassword);
         if (!connected)
