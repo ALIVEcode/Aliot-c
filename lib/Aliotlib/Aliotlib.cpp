@@ -12,7 +12,7 @@
     {               \
     }
 
-#define JSON StaticJsonDocument<1024>
+#define JSON StaticJsonDocument<256>
 
 #define FREQUENCY 5000
 #define RES 8
@@ -36,7 +36,7 @@
 #define EVT_CONNECT_OBJ "connect_object"
 #define EVT_CONNECT_SUCCESS "connect_success"
 #define EVT_ERROR "error"
-#define EVT_UPDATE "update"
+#define EVT_UPDATE "update_doc"
 #define EVT_ON_RECV "receive_action"
 #define EVT_PONG "pong"
 #define EVT_PING "ping"
@@ -99,16 +99,16 @@ struct AliotObj
         JSON response;
         while (aliotClient.connected() && aliotWebSocketClient.getData(_res))
         {
-            debugPrint("Received data: ");
-            debugPrintln(_res);
+            //debugPrint("Received data: ");
+            //debugPrintln(_res);
             deserializeJson(response, _res);
             String event = String(response["event"].as<const char *>());
 
             // ping
             if (event == EVT_PING)
             {
-                debugPrintln("Received ping");
-                debugPrintln(R"(Sending pong... {"event": "pong"})");
+                //debugPrintln("Received ping");
+                //debugPrintln(R"(Sending pong... {"event": "pong"})");
                 aliotWebSocketClient.sendData(R"({"event": "pong"})");
                 continue;
             }
@@ -157,7 +157,6 @@ struct AliotObj
     void updateProjectDoc(JSON fields)
     {
         JSON data;
-        data["objectId"] = objectId;
         data["fields"] = fields;
         _sendEvent(EVT_UPDATE, data);
     }
