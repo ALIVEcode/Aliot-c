@@ -36,6 +36,7 @@
 typedef void *AliotObjRef;
 
 #define AliotObjFromObjRef(x) reinterpret_cast<AliotObj *>(x)
+#define ObjFromRef(ObjType, x) reinterpret_cast<AliotObj *>(x)
 
 // events
 #define EVT_CONNECT_OBJ "connect_object"
@@ -50,11 +51,21 @@ WebSocketClient aliotWebSocketClient;
 WiFiClient aliotClient;
 WiFiManager wm;
 
+char *wifiName;
+char *wifiPassword;
+
+void systems_initialize(void)
+{
+    Serial.begin(115200);
+    WiFi.mode(WIFI_STA);
+}
+
 struct ActionListener
 {
-    int event;
+    uint16_t event;
     // String event;
     void (*callback)(void *obj, JSON data);
+    void *argsToPassIn[10];
 };
 
 /**
@@ -167,7 +178,7 @@ struct AliotObj
     }
 
     // void registerAction(const char *action, void (*callback)(JSON data))
-    void registerAction(int action, void (*callback)(void *object, JSON data))
+    void registerAction(uint16_t action, void (*callback)(void *object, JSON data))
     {
         // TODO register callback
         ActionListener actionListener{action, callback};
@@ -221,8 +232,10 @@ namespace aliot
      * @param wifiPassword
      * @return `true` if the esp32 is connected to the internet and `false` if the esp32 did not connect to the internet
      */
-    bool connectToWiFi(const char *wifiName = "AliotWiFi", const char *wifiPassword = "password")
+    bool connectToWiFi(char *wifi = "AliotWiFi", char *password = "password")
     {
+        wifiName = wifi;
+        wifiPassword = password;
         bool connected;
         connected = wm.autoConnect(wifiName, wifiPassword);
         if (!connected)
@@ -260,7 +273,7 @@ namespace aliot
         if (digitalRead(button) == activatedState)
         {
             wm.resetSettings();
-            return aliot::connectToWiFi();
+            return aliot::connectToWiFi(wifiName, wifiPassword);
         }
         return true;
     }

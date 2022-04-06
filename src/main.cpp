@@ -3,125 +3,108 @@
 #include <WebSocketClient.h>
 #include <WiFi.h>
 #include <Aliotlib.cpp>
-#include <Voiture.cpp>
+#include <RobotBrain.cpp>
 
-// // Pin assignation
-// #define LED_Status 2
-// // #define button 34
-// // #define RESET_BUTTON 33
-// // #define led 22
+// Pin assignation
+//*Motor DirectionPin front left
+#define EnableFL 15 // Enable pin connected to PWM
+#define MFLA 22     // Motor Direction
+#define MFLB 23     // Directional PIN
+//*Motor DirectionPin Front Right
+#define EnableFR 4 // Enable pin connected to PWM
+#define MFRA 19    // Directional PIN
+#define MFRB 21    // Directional PIN
+//*Motor DirectionPin Back Left
+#define EnableBL 13 // Enable pin connected to PWM
+#define MBLA 14     // Directional PIN
+#define MBLB 12     // Directional PIN
+//*Motor DirectionPin Back Right
+#define EnableBR 32 // Enable pin connected to PWM
+#define MBRA 25     // Directional PIN
+#define MBRB 33     // Directional PIN
 
-// //*Motor DirectionPin front left
-// #define EnableFL 15 // Enable pin connected to PWM
-// #define MFLA 23     // Motor Direction
-// #define MFLB 22     // Directional PIN
-// //*Motor DirectionPin Front Right
-// #define EnableFR 4 // Enable pin connected to PWM
-// #define MFRA 21    // Directional PIN
-// #define MFRB 19    // Directional PIN
-// //*Motor DirectionPin Back Left
-// #define EnableBL 13 // Enable pin connected to PWM
-// #define MBLA 12     // Directional PIN
-// #define MBLB 14     // Directional PIN
-// //*Motor DirectionPin Back Right
-// #define EnableBR 32 // Enable pin connected to PWM
-// #define MBRA 33     // Directional PIN
-// #define MBRB 25     // Directional PIN
-
-// //*Creation de GPIO PWM
-// PWM_Pin MEnFL(EnableFL);
-// PWM_Pin MEnFR(EnableFR);
-// PWM_Pin MEnBL(EnableBL);
-// PWM_Pin MEnBR(EnableBR);
+#define trigPin 27
+#define echoPin 36
 
 //! #define pas obligatoire pour assigner un GPIO
 // byte pins[]{MFLA, MFLB, MFRA, MFRB, MBLA, MBLB, MBRA, MBRB}; // Assignation GPIO direction des moteurs
 // Voiture maVoiture(pins);                                     // Initialization
 
+uint8_t enablePins[] = {EnableFL, EnableFR, EnableBL, EnableBR};
+uint8_t directionalPins[] = {MFLA, MFLB, MFRA, MFRB, MBLA, MBLB, MBRA, MBRB};
+Robot maVoiture(enablePins, directionalPins);
+
+rangeSensor range1(trigPin, echoPin);
+
 AliotObj monObjet("3a92c5b6-bd4f-4dd5-b531-6cfcc04971d7"); // ID de l'objet
 
-void miamiBeach(AliotObjRef obj, JSON data)
+#define FORWARD 10
+#define BACKWARD 20
+#define LEFT 30
+#define RIGHT 30
+
+void forward(AliotObjRef obj, JSON data)
 {
     AliotObj *iotObj = AliotObjFromObjRef(obj);
-    JSON fields;
-    fields["/document/pantalon"] = "poire";
-    debugPrintJSON(fields);
-    iotObj->updateProjectDoc(fields);
-    println("lol");
+}
+
+void backward(AliotObjRef obj, JSON data)
+{
+    AliotObj *iotObj = AliotObjFromObjRef(obj);
+}
+
+void left(AliotObjRef obj, JSON data)
+{
+    AliotObj *iotObj = AliotObjFromObjRef(obj);
+}
+
+void right(AliotObjRef obj, JSON data)
+{
+    AliotObj *iotObj = AliotObjFromObjRef(obj);
 }
 
 void setup()
 {
-    // pinMode(LED_Status, OUTPUT);
-    // maVoiture.init();
-    // MEnFL.init();
-    // MEnFR.init();
-    // MEnBL.init();
-    // MEnBR.init();
-
-    // pinMode(led, OUTPUT);
-    // pinMode(button, INPUT);
-    // pinMode(RESET_BUTTON, INPUT);
-
-    WiFi.mode(WIFI_STA);
-
-    Serial.begin(115200);
-
+    systems_initialize();
+    range1.init();
+    maVoiture.init();
     bool connected = aliot::connectToWiFi();
     if (!connected)
         END_PROGRAM
-
-    // digitalWrite(LED_Status, HIGH);
 
     if (!aliot::connectToAliveCode("10.0.0.45", "/"))
         END_PROGRAM
 
     monObjet.connect();
 
-    monObjet.registerAction(1, &miamiBeach);
+    monObjet.registerAction(FORWARD, &forward);
+    monObjet.registerAction(BACKWARD, &backward);
+    monObjet.registerAction(LEFT, &left);
+    monObjet.registerAction(RIGHT, &right);
 }
 
-bool msg = false;
-
+bool ended = false;
+float distance;
 void loop()
 {
     if (!monObjet.update())
     {
-        if (!msg)
+        if (!ended)
         {
-            msg = true;
+            ended = true;
             println("Disconnected from ALIVEcode");
         }
         return;
     }
-    // MEnFL.analogWrite(170);
-    // MEnFR.analogWrite(170);
-    // MEnBL.analogWrite(170);
-    // MEnBR.analogWrite(170);
 
-    // maVoiture.turnLeft();
-    // println("turn Right");
+    maVoiture.forward(130);
+    do
+    {
+        distance = range1.read();
+        println(distance);
 
-    // delay(2000);
+    } while (distance >= 15);
 
-    // maVoiture.turnRight();
-    // println("turn left");
-
-    // delay(2000);
-
-    // maVoiture.forward();
-    // println("forward");
-
-    // delay(2000);
-
-    // maVoiture.turnRight();
-    // println("turn Right");
-
-    // delay(2000);
-    // maVoiture.backward();
-    // println("Backward");
-    // delay(1000);
-
-    // if (!aliot::resetWiFiOnPress(RESET_BUTTON))
-    //     END_PROGRAM
+    maVoiture.turnRight(200);
+    delay(400);
 }
