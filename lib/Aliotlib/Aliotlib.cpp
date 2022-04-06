@@ -49,7 +49,7 @@ struct ActionListener
 {
     int event;
     // String event;
-    void (*callback)(AliotObj object, JSON data);
+    void (*callback)(void *obj, JSON data);
 };
 
 /**
@@ -146,7 +146,7 @@ struct AliotObj
                 {
                     if (this->actions[i].event == id)
                     {
-                        this->actions[i].callback(*this, value);
+                        this->actions[i].callback(this, value);
                     }
                 }
             }
@@ -163,7 +163,7 @@ struct AliotObj
     }
 
     // void registerAction(const char *action, void (*callback)(JSON data))
-    void registerAction(int action, void (*callback)(AliotObj object, JSON data))
+    void registerAction(int action, void (*callback)(void *object, JSON data))
     {
         // TODO register callback
         ActionListener actionListener{action, callback};
