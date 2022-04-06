@@ -40,9 +40,9 @@
 
 AliotObj monObjet("3a92c5b6-bd4f-4dd5-b531-6cfcc04971d7"); // ID de l'objet
 
-void miamiBeach(void *obj, JSON data)
+void miamiBeach(AliotObjRef obj, JSON data)
 {
-    AliotObj *iotObj = reinterpret_cast<AliotObj *>(obj);
+    AliotObj *iotObj = AliotObjFromObjRef(obj);
     JSON fields;
     fields["/document/pantalon"] = "poire";
     debugPrintJSON(fields);

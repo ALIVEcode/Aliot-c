@@ -32,6 +32,11 @@
 #define print(x) Serial.print(x)
 #define println(x) Serial.println(x)
 
+// get back aliotObj
+typedef void *AliotObjRef;
+
+#define AliotObjFromObjRef(x) reinterpret_cast<AliotObj *>(x)
+
 // events
 #define EVT_CONNECT_OBJ "connect_object"
 #define EVT_CONNECT_SUCCESS "connect_success"
@@ -99,16 +104,16 @@ struct AliotObj
         JSON response;
         while (aliotClient.connected() && aliotWebSocketClient.getData(_res))
         {
-            //debugPrint("Received data: ");
-            //debugPrintln(_res);
+            // debugPrint("Received data: ");
+            // debugPrintln(_res);
             deserializeJson(response, _res);
             String event = String(response["event"].as<const char *>());
 
             // ping
             if (event == EVT_PING)
             {
-                //debugPrintln("Received ping");
-                //debugPrintln(R"(Sending pong... {"event": "pong"})");
+                // debugPrintln("Received ping");
+                // debugPrintln(R"(Sending pong... {"event": "pong"})");
                 aliotWebSocketClient.sendData(R"({"event": "pong"})");
                 continue;
             }
